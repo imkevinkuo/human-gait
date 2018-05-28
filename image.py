@@ -214,12 +214,11 @@ def usage():
 ## COMMAND LINE ##
 if len(sys.argv) == 2: # one subject, will display video frames
     
-    #### TODO: rip speed from file path, search for underscore
-    speed = 10 #10km/h
-    
     path = '.\\' + sys.argv[1]
     num_files = len([f for f in os.listdir(path)
                     if os.path.isfile(os.path.join(path, f))])
+    speed = int(path[path.rfind('_')+1:-2]) #gallery_10km -> 10
+    
     files = []
     zaxis = []
     front = None
@@ -264,10 +263,11 @@ if len(sys.argv) == 2: # one subject, will display video frames
     clen = sum(lmn[f+1]-lmn[f] for f in range(1, len(lmn)-1))/(len(lmn)-2)
     print("%d files loaded. %s" % (len(files), " "*50))
     print("Average stride length:", clen, "frames,", clen*(speed/216), "meters")
-    # compare ellipse features of similar frames,
-    # e.g. when leg strikes or when highest point
+
+    #### TODO: Ellipse data analysis
     #es = [ellipse(files[m]) for m in lmx]
     #print(sum(es)/len(smn))
+    
     displayImage(files, zaxis, zd)
 else:
     usage()
