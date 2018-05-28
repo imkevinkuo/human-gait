@@ -1,6 +1,6 @@
 # human-gait
   
-A research project on extracting features of human gait from side-view treadmill videos.
+A research project on extracting features of human gait from side-view treadmill videos.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/00008.png" width="20%">
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/00001red.png" width="20%">
 
