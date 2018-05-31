@@ -12,5 +12,5 @@ Once we have a graph of vertical position, we can take the 1st derivative to mea
 
 ## Ellipse of Approximation
 Method documented in <a href="https://dl.acm.org/citation.cfm?id=2676612">Extracting silhouette-based characteristics for human gait analysis using one camera</a>.  
-If we plot the angle of inclination (obtained by using an ellipse to approximate the shape of the silhouette), we can clearly see the frames of left/right foot strike, given by the (respectively) higher/lower local minima of the graph.
+If we plot the angle of inclination (obtained by using an ellipse to approximate the shape of the silhouette), we can clearly see the frames of left/right foot strike, given by the (respectively) higher/lower local minima of the graph.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/ellipseangles.png" width="60%">  

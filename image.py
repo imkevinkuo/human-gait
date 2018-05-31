@@ -8,7 +8,8 @@ import os.path
 def displayImage(files, zaxis, zd):
     index = 0
     while True:
-        print(index, zaxis[index], zd[index])
+        sys.stdout.write("%d, %f, %f     \r" % (index, zaxis[index], zd[index]))
+        sys.stdout.flush()
         cv2.imshow("", cv2.resize(files[index], (352,512)))
         k = cv2.waitKeyEx(0)
         if k == 32:
@@ -136,8 +137,7 @@ def ellipse(img):
         ax = math.sqrt(5.99*evals[e])
         evecs[e] = evecs[e]*ax
         evecs[e][1] = -evecs[e][1]
-    return(angle)
-    #return(center.astype(int),evecs.astype(int))
+    return ((center.astype(int),evecs.astype(int)),angle)
 def getNeck(img, front, back):
     cutoffA = 0
     cutoffB = img.shape[0]//3
@@ -208,11 +208,11 @@ def getHeadCenter(img, front, back):
     return -(ztotal/znum)
 
 def usage():
-    print("Usage: image.py <directory> - runs analysis on folder of video frames")
+    print("Usage: image.py <directory> <0 (head) or 1 (ellipse)>")
     sys.exit()
     
 ## COMMAND LINE ##
-if len(sys.argv) == 2: # one subject, will display video frames
+if len(sys.argv) == 3: # one subject, will display video frames
     
     path = '.\\' + sys.argv[1]
     num_files = len([f for f in os.listdir(path)
@@ -220,10 +220,11 @@ if len(sys.argv) == 2: # one subject, will display video frames
     speed = int(path[path.rfind('_')+1:-2]) #gallery_10km -> 10
     
     files = []
-    zaxis = []
+    data = []
     front = None
     back = None
     print()
+    
     for ind in range(0, num_files):
         # read in file
         name = str(ind+1).zfill(8) + ".png"
@@ -233,41 +234,45 @@ if len(sys.argv) == 2: # one subject, will display video frames
         # update progress
         size = 40
         bars = ((ind+1)*size)//num_files # 10 bars total
-        sys.stdout.write(name + " [" + "="*bars + " "*(size-bars) + "] " + '\r')
-        sys.stdout.flush() # important
+        sys.stdout.write(name + " [" + u"\u25A0"*bars + " "*(size-bars) + "] " + '\r')
+        sys.stdout.flush()
 
-        ## head center method
-        front, back = getNeck(img, front, back)
-        zavg = getHeadCenter(img, front, back)
-
-        ## ellipse method
-        #fvecs = ellipse(img)
-        #cv2.line(img, tuple(fvecs[0]), tuple(fvecs[0]+fvecs[1][0]), [0,0,255], 1)
-        #cv2.line(img, tuple(fvecs[0]), tuple(fvecs[0]+fvecs[1][1]), [0,0,255], 1)
-        zaxis.append(zavg)
-        #zaxis.append(fvecs)
+        if sys.argv[2] == "0": # head center method
+            front, back = getNeck(img, front, back)
+            zavg = getHeadCenter(img, front, back)
+            data.append(zavg)
+            
+        if sys.argv[2] == "1": # ellipse method
+            fvecs, angle = ellipse(img)
+            cv2.line(img, tuple(fvecs[0]), tuple(fvecs[0]+fvecs[1][0]), [0,0,255], 1)
+            cv2.line(img, tuple(fvecs[0]), tuple(fvecs[0]+fvecs[1][1]), [0,0,255], 1)
+            data.append(angle)
         
         files.append(img)
-    
-    # displaying data for head center method
-    z = [a for a in zaxis]
-    zd = diff(z)
-    plot(z,zd)
-    lmx = localMaxs(z, zd)
-    lmn = localMins(z, zd)
-    smn = singleMins(zd,lmx) # foot strike
-
-    #### TODO: Info on magnitude of z graph
-    #### TODO: clustering based on features
-    
-    clen = sum(lmn[f+1]-lmn[f] for f in range(1, len(lmn)-1))/(len(lmn)-2)
+        
     print("%d files loaded. %s" % (len(files), " "*50))
-    print("Average stride length:", clen, "frames,", clen*(speed/216), "meters")
-
-    #### TODO: Ellipse data analysis
-    #es = [ellipse(files[m]) for m in lmx]
-    #print(sum(es)/len(smn))
     
-    displayImage(files, zaxis, zd)
+    if sys.argv[2] == "0": # displaying data for head center method
+        y = [y for y in data]
+        yd = diff(y)
+        plot(y,yd)
+        lmx = localMaxs(y, yd)
+        lmn = localMins(y, yd)
+        smn = singleMins(yd,lmx)
+        vert = sum(y[f] for f in lmx)/len(lmx) - sum(y[f] for f in lmn)/len(lmn)
+        clen = sum(lmn[f+1]-lmn[f] for f in range(1, len(lmn)-1))/(len(lmn)-2)
+        print("Vertical range:", vert, "pixels")
+        print("Average stride length:", clen, "frames,", clen*(speed/216), "meters")
+        print("Frame, Y-Average, Y-Velocity")
+        displayImage(files, y, yd)
+
+    if sys.argv[2] == "1": #### TODO: Ellipse data analysis
+        plot(data,data)
+        displayImage(files,data,data)
+
+    #### TODO: clustering based on features
+
+    print()
+    
 else:
     usage()
