@@ -14,3 +14,10 @@ Once we have a graph of vertical position, we can take the 1st derivative to mea
 Method documented in <a href="https://dl.acm.org/citation.cfm?id=2676612">Extracting silhouette-based characteristics for human gait analysis using one camera</a>.  
 If we plot the angle of inclination (obtained by using an ellipse to approximate the shape of the silhouette), we can clearly see the frames of left/right foot strike, given by the (respectively) higher/lower local minima of the graph.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/ellipseangles.png" width="60%">  
+
+## Fitting Data
+Using the "vertical position and velocity" technique, position-time series are extracted from 28 subjects. Each subject has a "gallery" and a "probe" series (both consisting of 300 data points). To classify each "probe" series, we directly use the "gallery" videos as a model. We then use nearest-neighbor classifcation, measuring euclidian distance with discrete time warping with hyperparameter w=10.
+
+Out of the 28 subjects, 15 are correctly classified on the 1st guess.
+If the "correct guess" range is extended to potential 5 subjects, our accuracy increases to 93% (26/28).
+<img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/z_nn_classification.png" width="40%">

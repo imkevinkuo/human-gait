@@ -4,6 +4,7 @@ import cv2
 import sys
 import math
 import os.path
+import json
 
 def displayImage(files, zaxis, zd):
     index = 0
@@ -137,14 +138,13 @@ def ellipse(img):
         ax = math.sqrt(5.99*evals[e])
         evecs[e] = evecs[e]*ax
         evecs[e][1] = -evecs[e][1]
-    return ((center.astype(int),evecs.astype(int)),angle)
-def getNeck(img, front, back):
-    cutoffA = 0
+    return (center.astype(int),evecs.astype(int),angle)
+def getNeck(img,front,back): # just get shortest distance across silhouette
+    cutoffA = 10
     cutoffB = img.shape[0]//3
-    if front and back: # if we are doing local search
+    if front != None and back != None:
         cutoffA = back[0]-2
         cutoffB = front[0]+2
-        
     fronts = []
     backs = []
     for row in range(cutoffA, cutoffB):
@@ -158,38 +158,25 @@ def getNeck(img, front, back):
                 if np.any(img[row,col]) != 0: # non-black pixel
                     lastW = col
                 col += 1
-        fronts.append(firstW)
-        backs.append(lastW)
-        
-    # local search based on previous frame
-    if front and back:
-        return (fronts.index(max(fronts))+cutoffA, max(fronts)), (backs.index(min(backs))+cutoffA, min(backs))
-
-    # if this is the first time, use whole head shape:
-    # back will increase, then decrease: find min after
-    # front will decrease, then increase: find max after
-    eb = ezdiff(backs)
-    ebStart = 0
-    ebPointer = 0
-    while eb[ebPointer] >= 0:
-        ebPointer += 1
-    while ebPointer < len(eb) and eb[ebPointer] <= 0:
-        if eb[ebPointer] < 0:
-            ebStart = ebPointer + 1
-        ebPointer += 1
-    
-    ef = ezdiff(fronts)
-    efStart = 0
-    efPointer = 0
-    while efStart < ebStart: # padding to avoid front above back
-        while ef[efPointer] <= 0:
-            efPointer += 1
-        while efPointer < len(ef) and ef[efPointer] >= 0:
-            if ef[efPointer] > 0:
-                efStart = efPointer + 1
-            efPointer += 1
-    return (efStart, fronts[efStart]), (ebStart, backs[ebStart])
-        
+        fronts.append((row,firstW))
+        backs.append((row,lastW))
+    return closestPair(fronts,backs)
+def closestPair(A,B):
+    min_A = A[0]
+    min_B = B[0]
+    min_d = dist(A[0], B[0])
+    for a in A:
+        for b in B:
+            d = dist(a,b)
+            if d < min_d:
+                min_A = a
+                min_B = b
+                min_d = d
+    return min_A, min_B
+def dist(a,b):
+    dx = abs(a[0]-b[0])
+    dy = abs(a[1]-b[1])
+    return dx*dx + dy*dy
 # Uses the 'front' and 'back' pixels from getNeck to
 # calcualte geometric center of the subject's head
 def getHeadCenter(img, front, back):
@@ -205,53 +192,60 @@ def getHeadCenter(img, front, back):
                 img[row,col] = [0,0,255]
                 ztotal += row
                 znum += 1
+    if znum == 0:
+        return 0
     return -(ztotal/znum)
 
 def usage():
     print("Usage: image.py <directory> <0 (head) or 1 (ellipse)>")
     sys.exit()
-    
-## COMMAND LINE ##
-if len(sys.argv) == 3: # one subject, will display video frames
-    
-    path = '.\\' + sys.argv[1]
+
+def processSubject(path, t): # t is type of feature extraction
     num_files = len([f for f in os.listdir(path)
                     if os.path.isfile(os.path.join(path, f))])
-    speed = int(path[path.rfind('_')+1:-2]) #gallery_10km -> 10
-    
-    files = []
-    data = []
-    front = None
-    back = None
+    files, data = [], []
+    front, back = None, None
     print()
-    
     for ind in range(0, num_files):
         # read in file
         name = str(ind+1).zfill(8) + ".png"
         img = cv2.imread(path + "\\" + name, -1)
         img = cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
-        
         # update progress
         size = 40
         bars = ((ind+1)*size)//num_files # 10 bars total
         sys.stdout.write(name + " [" + u"\u25A0"*bars + " "*(size-bars) + "] " + '\r')
         sys.stdout.flush()
-
-        if sys.argv[2] == "0": # head center method
+        if t == "0": # head center method
             front, back = getNeck(img, front, back)
             zavg = getHeadCenter(img, front, back)
             data.append(zavg)
-            
-        if sys.argv[2] == "1": # ellipse method
-            fvecs, angle = ellipse(img)
-            cv2.line(img, tuple(fvecs[0]), tuple(fvecs[0]+fvecs[1][0]), [0,0,255], 1)
-            cv2.line(img, tuple(fvecs[0]), tuple(fvecs[0]+fvecs[1][1]), [0,0,255], 1)
+        if t == "1": # ellipse method
+            center, evecs, angle = ellipse(img)
+            cv2.line(img, tuple(center), tuple(center+evecs[0]), [0,0,255], 1)
+            cv2.line(img, tuple(center), tuple(center+evecs[1]), [0,0,255], 1)
             data.append(angle)
-        
         files.append(img)
-        
-    print("%d files loaded. %s" % (len(files), " "*50))
-    
+    print(path + " loaded." + " "*20)
+    return files, data
+## COMMAND LINE ##
+if len(sys.argv) == 2:
+    T = sys.argv[1]
+    parent_dir = ".\\TreadmillDatasetA"
+    folder = "gallery_10km" 
+    exclude = ["00116", "00117", "00124", "00128", "00134", "00140"]
+    if T == "0" or T == "1":
+        all_data = []
+        subjects = os.listdir(parent_dir)
+        for subject in subjects:
+            if T == "1" or subject not in exclude:
+                path = parent_dir + "\\" + subject + "\\" + folder
+                files, data = processSubject(path, T)
+                all_data.append(data)
+        with open(folder + '.json', 'w') as outfile:
+            json.dump(all_data, outfile)
+if len(sys.argv) == 3: # one subject, will display video frames
+    files, data = processSubject('.\\' + sys.argv[1], sys.argv[2])
     if sys.argv[2] == "0": # displaying data for head center method
         y = [y for y in data]
         yd = diff(y)
@@ -262,15 +256,13 @@ if len(sys.argv) == 3: # one subject, will display video frames
         vert = sum(y[f] for f in lmx)/len(lmx) - sum(y[f] for f in lmn)/len(lmn)
         clen = sum(lmn[f+1]-lmn[f] for f in range(1, len(lmn)-1))/(len(lmn)-2)
         print("Vertical range:", vert, "pixels")
-        print("Average stride length:", clen, "frames,", clen*(speed/216), "meters")
+        print("Average stride length:", clen, "frames")
         print("Frame, Y-Average, Y-Velocity")
         displayImage(files, y, yd)
 
-    if sys.argv[2] == "1": #### TODO: Ellipse data analysis
+    if sys.argv[2] == "1":
         plot(data,data)
         displayImage(files,data,data)
-
-    #### TODO: clustering based on features
 
     print()
     
