@@ -15,12 +15,12 @@ Method documented in <a href="https://dl.acm.org/citation.cfm?id=2676612">Extrac
 If we plot the angle of inclination (obtained by using an ellipse to approximate the shape of the silhouette), we can clearly see the frames of left/right foot strike, given by the (respectively) higher/lower local minima of the graph.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/ellipseangles.png" width="60%">  
 
-However, the coordinates of the ellipse are not visually friendly - this is because in a side treadmill video, the arms and legs cross over the body and each other frequently, skewing the average of all the pixels in the image. Other factors such as clothing and hair also create artifacts in the data.  
+However, the plot of the ellipse center's height is not visually friendly - this is because in a side treadmill video, the arms and legs cross over the body and each other frequently, skewing the average of all the pixels in the image. Other factors such as clothing and hair also create artifacts in the data.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/ellipseheight.png" width="60%">  
 
 
 ## Fitting Data
 Using the "vertical position and velocity" technique, position-time series are extracted from 28 subjects. Each subject has a "gallery" and a "probe" series (both consisting of 300 data points). To classify each "probe" series, we directly use the "gallery" videos as a model. We then use nearest-neighbor classifcation, measuring euclidian distance with discrete time warping with hyperparameter w=10.  
-Out of the 28 subjects, 15 are correctly classified on the 1st guess.  
-If the "correct guess" range is extended to potential 5 subjects, our accuracy increases to 93% (26/28).  
+Out of the 28 subjects, 15 are correctly classified as the "most likely match".  
+If the "correct guess" range is extended to the 5 most likely subjects, our accuracy increases to 93% (26/28).  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/z_nn_classification.png" width="40%">
