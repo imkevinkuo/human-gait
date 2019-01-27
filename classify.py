@@ -42,6 +42,8 @@ def truncate_z(s):
                     min_i = j
             c = min_i
         i += 1
+    print(min_i)
+##    plot(s)
     return s[c:270+c]
 def truncate_a(s):
     # clip a single angle series at the first big min
@@ -130,12 +132,20 @@ def avg(D): # D = list of vectors
         return [sum(d[i] for d in D)/N for i in range(dim)]
     return None
 
-# try partitioning series into double cycles, so we have around 27*6 training
-# dtw works on cycles with different length
-def partition_data(data):
+# finds the mins for s_data
+def split_cyc(s):
+    cutoff = min(s) + (max(s)-min(s))/2
+    under = [i for i in range(len(s)) if s[i] < cutoff]
     i = 0
-##    for s in data:
-##        plot(s)
+    mins = []
+    for u in range(len(under)-1):
+        if under[u+1]-under[u] > 3:
+            mins.append(min(under[i:u+1], key=lambda f:s[f]))
+            i = u+1
+    if len(mins)%2 == 0:
+        mins = mins[:-1]
+    return mins
+
 
 # TRY:
 # try dtw + KNN voting on partitioned cycles
@@ -155,9 +165,15 @@ def partition_data(data):
 ##fit_series(g_n, p_n)
 
 # 28 subjects, 300 data point time series each of z-height
-g_raw = json.load(open("z_gallery_10km.json", "r"))
-p_raw = json.load(open("z_probe_10km.json", "r"))
-g_n = [truncate_z(s) for s in g_raw]
-p_n = [truncate_z(s) for s in p_raw]
+##g_raw = json.load(open("z_gallery_10km.json", "r"))
+##p_raw = json.load(open("z_probe_10km.json", "r"))
+##g_n = [truncate_z(s) for s in g_raw]
+##p_n = [truncate_z(s) for s in p_raw]
 ##cluster_series(g_n,p_n)
-NN_series(g_n, p_n)
+##NN_series(g_n, p_n)
+##g_n_s = [split_cyc(s) for s in g_n]
+
+# trying pixel sum and average silhouette
+g_raw = json.load(open("s_gallery_10km.json", "r"))
+for s in g_raw:
+    g_n = [split_cyc(s) for s in g_raw]

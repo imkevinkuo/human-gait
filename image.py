@@ -6,36 +6,20 @@ import math
 import os.path
 import json
 
-def displayImage(files, zaxis, zd):
+def displayImage(files, data):
     index = 0
     while True:
-        sys.stdout.write("%d, %f, %f     \r" % (index, zaxis[index], zd[index]))
+        sys.stdout.write("%d, %f     \r" % (index, data[index]))
         sys.stdout.flush()
-        cv2.imshow("", cv2.resize(files[index], (352,512)))
+        cv2.imshow("", cv2.resize(files[index],(352,512)))
         k = cv2.waitKeyEx(0)
-        if k == 32:
-            print("Local maxes:", lmx) # high point
-            print("Single mins:", smn) # foot strike
-            print("Local mins:", lmn)  # low point
         if k == 27:
             cv2.destroyAllWindows()
             sys.exit(0)
         if k == 2555904 and index+1 < len(files):
-                index += 1;
+            index += 1;
         if k == 2424832 and index > 0:
-                index -= 1;
-        if k == ord('s'):
-            cv2.imwrite("out.jpg", img)
-            print("saved out.jpg")
-def highlightPoints(img, points, color):
-    temp = img.copy()
-    for point in points:
-        temp[point] = color
-    return temp
-
-# graph/math helpers
-def ezdiff(lis): # difference between each index
-    return [lis[i+1]-lis[i] for i in range(len(lis)-1)]
+            index -= 1;
 def diff(lis):
     dlis = []
     dlis.append(lis[1] - lis[0])
@@ -43,72 +27,10 @@ def diff(lis):
         dlis.append(((lis[x] - lis[x-1])+(lis[x+1] - lis[x]))/2)
     dlis.append(lis[len(lis)-1] - lis[len(lis)-2])
     return dlis
-# find local max of z graph to get avg cycle length
-def localMaxs(lis, dlis):
-    lm = []
-    for x in range(1, len(lis)-4):
-        sz = 5
-        if x < 4:
-            sz = x+1
-        for r in range(1,sz):
-            if (lis[x] < lis[x+r] or lis[x] < lis[x-r]):
-                break
-        if r == sz-1:
-            lm.append(x)
-    # prevent duplicates
-    toRemove = set()
-    for x in range(0, len(lm)-1):
-        tol = 8 # tolerance
-        if lm[x+1] - lm[x] < tol: # 2 maxes less than X frames apart
-            if abs(dlis[lm[x]]) > abs(dlis[lm[x+1]]):
-                toRemove.add(lm[x])
-            else:
-                toRemove.add(lm[x+1])
-    for frame in toRemove:
-        lm.remove(frame)
-    return lm
-def localMins(lis, dlis):
-    lm = []
-    for x in range(1, len(lis)-4):
-        sz = 5
-        if x < 4:
-            sz = x+1
-        for r in range(1,sz):
-            if (lis[x] > lis[x+r] or lis[x] > lis[x-r]):
-                break
-        if r == sz-1:
-            lm.append(x)
-    # prevent duplicates
-    toRemove = set()
-    for x in range(0, len(lm)-1):
-        tol = 8 # tolerance
-        if lm[x+1] - lm[x] < tol: # 2 mins less than X frames apart
-            if abs(dlis[lm[x]]) > abs(dlis[lm[x+1]]):
-                toRemove.add(lm[x])
-            else:
-                toRemove.add(lm[x+1])
-    for frame in toRemove:
-        lm.remove(frame)
-    return lm
-# greater z value = lower irl
-def singleMins(lis, lmax): # will search in each cycle for one min
-    lm = []
-    for x in range(0, len(lmax)-1):
-        m = 10000
-        mi = -1
-        for f in range(lmax[x], lmax[x+1]):
-            if lis[f] < m:
-                m = lis[f]
-                mi = f
-        lm.append(mi);
-    return lm
-def plot(z, zd):
+def plot(z):
     plt.subplot(211)
     plt.plot(z, 'bo', z, 'k')
-    plt.subplot(212)
-    plt.plot(zd, 'bo', zd, 'k')
     plt.show()
-    
 def ellipse(img):
     #center
     xt = 0
@@ -117,7 +39,7 @@ def ellipse(img):
     points = set()
     for row in range(0, img.shape[0]):
         for col in range(0, img.shape[1]):
-            if np.all(img[row,col] >= [254,254,254]):
+            if img[row,col] > 250:
                 xt += col
                 yt += row
                 c += 1
@@ -139,7 +61,7 @@ def ellipse(img):
         evecs[e] = evecs[e]*ax
         evecs[e][1] = -evecs[e][1]
     return (center.astype(int),evecs.astype(int),angle)
-def getNeck(img,front,back): # just get shortest distance across silhouette
+def getNeck(img,front,back): # shortest distance across silhouette
     cutoffA = 10
     cutoffB = img.shape[0]//3
     if front != None and back != None:
@@ -150,12 +72,12 @@ def getNeck(img,front,back): # just get shortest distance across silhouette
     for row in range(cutoffA, cutoffB):
         firstW = 0
         lastW = 0
-        while firstW < img.shape[1] and np.any(img[row, firstW]) == 0:
+        while firstW < img.shape[1] and img[row, firstW] < 3:
             firstW += 1
         if firstW < img.shape[1]:
             col = firstW
             while col < img.shape[1]:
-                if np.any(img[row,col]) != 0: # non-black pixel
+                if img[row,col] > 250: # non-black pixel
                     lastW = col
                 col += 1
         fronts.append((row,firstW))
@@ -180,16 +102,16 @@ def dist(a,b):
 # Uses the 'front' and 'back' pixels from getNeck to
 # calcualte geometric center of the subject's head
 def getHeadCenter(img, front, back):
-    # draw connecting line and shade all pixels above
-    cv2.line(img, (front[1],front[0]), (back[1],back[0]), [0,0,255], 1)
+##    cv2.line(img, (front[1],front[0]), (back[1],back[0]), [0,0,255], 1)
+    m = (front[1]-back[1])/(front[0]-back[0]+0.001)
+    b = back[1] - m*back[0]
+    # row is x, col is y
     ztotal = 0
     znum = 0
     for row in range(0, front[0]):
+        y = m*row + b
         for col in range(0, img.shape[1]):
-            if np.all(img[row,col] == [0,0,255]):
-                break
-            elif np.any(img[row,col] != 0):
-                img[row,col] = [0,0,255]
+            if col < y and img[row,col] > 250:
                 ztotal += row
                 znum += 1
     if znum == 0:
@@ -197,7 +119,7 @@ def getHeadCenter(img, front, back):
     return -(ztotal/znum)
 
 def usage():
-    print("Usage: image.py <directory> <0 (head) or 1 (ellipse)>")
+    print("Usage: image.py <directory> <extract type>")
     sys.exit()
 
 def processSubject(path, t): # t is type of feature extraction
@@ -209,8 +131,7 @@ def processSubject(path, t): # t is type of feature extraction
     for ind in range(0, num_files):
         # read in file
         name = str(ind+1).zfill(8) + ".png"
-        img = cv2.imread(path + "\\" + name, -1)
-        img = cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
+        img = cv2.imread(path + "\\" + name, 0)
         # update progress
         size = 40
         bars = ((ind+1)*size)//num_files # 10 bars total
@@ -222,48 +143,66 @@ def processSubject(path, t): # t is type of feature extraction
             data.append(zavg)
         if t == "1": # ellipse method
             center, evecs, angle = ellipse(img)
-            cv2.line(img, tuple(center), tuple(center+evecs[0]), [0,0,255], 1)
-            cv2.line(img, tuple(center), tuple(center+evecs[1]), [0,0,255], 1)
+##            cv2.line(img, tuple(center), tuple(center+evecs[0]), [0,0,255], 1)
+##            cv2.line(img, tuple(center), tuple(center+evecs[1]), [0,0,255], 1)
             data.append(angle)
+        if t == "2": # count # of white pixels
+            data.append(int(np.sum(img > 250)))
         files.append(img)
     print(path + " loaded." + " "*20)
     return files, data
+def avg_shad(files, data):
+    avg_imgs = []
+    m = split_cyc(data)
+    for i in range(0,len(m)-2,2):
+        N = m[i+2]-m[i]
+        avg_imgs.append(np.uint8(sum([(a/N).astype(int) for a in files[m[i]:m[i+2]]])))
+    return avg_imgs
+def split_cyc(s):
+    cutoff = min(s) + (max(s)-min(s))/2
+    under = [i for i in range(len(s)) if s[i] < cutoff]
+    i = 0
+    mins = []
+    for u in range(len(under)-1):
+        if under[u+1]-under[u] > 3:
+            mins.append(min(under[i:u+1], key=lambda f:s[f]))
+            i = u+1
+    if len(mins)%2 == 0:
+        mins = mins[:-1]
+    return mins
 ## COMMAND LINE ##
 if len(sys.argv) == 2:
     T = sys.argv[1]
-    parent_dir = ".\\TreadmillDatasetA"
-    folder = "gallery_10km" 
-    exclude = ["00116", "00117", "00124", "00128", "00134", "00140"]
-    if T == "0" or T == "1":
+    cwd = os.getcwd()
+    datadir = "TreadmillDatasetA"
+    folder = "gallery_10km"
+    accepted = ["0", "1", "2"]
+    if T in accepted:
+        exclude = []
+        if T == "0":
+            exclude = ["00116", "00117", "00124", "00128", "00134", "00140"]
+        if T == "2":
+            os.mkdir(datadir+"_avg")
         all_data = []
-        subjects = os.listdir(parent_dir)
+        subjects = os.listdir(os.path.join(cwd,datadir))
         for subject in subjects:
-            if T == "1" or subject not in exclude:
-                path = parent_dir + "\\" + subject + "\\" + folder
+            if T != "0" or subject not in exclude:
+                path = os.path.join(cwd, datadir, subject, folder)
                 files, data = processSubject(path, T)
                 all_data.append(data)
+                if T == "2":
+                    os.mkdir(os.path.join(datadir+"_avg", subject))
+                    av_f = avg_shad(files,data)
+                    av_p = os.path.join(cwd, datadir+"_avg", subject)
+                    for i in range(len(av_f)):
+                        filepath = os.path.join(av_p, str(i) + ".png")
+                        cv2.imwrite(filepath, av_f[i])
         with open(folder + '.json', 'w') as outfile:
             json.dump(all_data, outfile)
-if len(sys.argv) == 3: # one subject, will display video frames
+elif len(sys.argv) == 3: # one subject, will display video frames
     files, data = processSubject('.\\' + sys.argv[1], sys.argv[2])
-    if sys.argv[2] == "0": # displaying data for head center method
-        y = [y for y in data]
-        yd = diff(y)
-        plot(y,yd)
-        lmx = localMaxs(y, yd)
-        lmn = localMins(y, yd)
-        smn = singleMins(yd,lmx)
-        vert = sum(y[f] for f in lmx)/len(lmx) - sum(y[f] for f in lmn)/len(lmn)
-        clen = sum(lmn[f+1]-lmn[f] for f in range(1, len(lmn)-1))/(len(lmn)-2)
-        print("Vertical range:", vert, "pixels")
-        print("Average stride length:", clen, "frames")
-        print("Frame, Y-Average, Y-Velocity")
-        displayImage(files, y, yd)
-
-    if sys.argv[2] == "1":
-        plot(data,data)
-        displayImage(files,data,data)
-
+    plot(data)
+    displayImage(files,data)
     print()
     
 else:
