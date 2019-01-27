@@ -28,12 +28,16 @@ However, the plot of the ellipse center's height is not visually friendly - this
 ## Fitting time series
 Using the "vertical position and velocity" technique, position-time series are extracted from 28 subjects. Each subject has a "gallery" and a "probe" series (both consisting of 300 data points). To classify each "probe" series, we directly use the "gallery" videos as a model. We then use nearest-neighbor classifcation, measuring euclidian distance with discrete time warping with hyperparameter w=10.  
 Out of the 28 "probe" videos:  
-- 15 are matched correctly to their "gallery" video.  
+- 15 are matched correctly to their "gallery" video.  		
 - 5 have the correct answer as the 2nd most likely match.  
 - 3 are 3rd and 5th most likely.  
 Overall, 26/28 of the subjects have both their videos classified somewhat near each other.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/z_nn_classification.png" width="40%">  
 
 ## Average silhouette
-To avoid classifying time series data, we can split each subject's data into stride cycles (given by any of the previous methods), then average all of the frames in a cycle to create an image classification problem.    
-<img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/avgsilhouette.png" width="20%">  
+To avoid classifying time series data, we can split each subject's data into stride cycles (given by any of the previous methods), then average all of the frames in a cycle to create an image classification problem.  
+For example, the following images represent different stride cycles from the same subject:  
+<img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/0.png" width="20%">
+<img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/1.png" width="20%">
+<img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/2.png" width="20%">
+<img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/3.png" width="20%">  
