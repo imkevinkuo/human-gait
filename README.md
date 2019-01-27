@@ -35,7 +35,7 @@ Overall, 26/28 of the subjects have both their videos classified somewhat near e
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/z_nn_classification.png" width="40%">  
 
 ## Average silhouette
-To avoid classifying time series data, we can split each subject's data into stride cycles (given by any of the previous methods), then average all of the frames in a cycle to create an image classification problem.  
+To avoid classifying time series data, we can split each subject's data into stride cycles (given by any of the previous methods), then average all of the frames in a cycle to create an image classification problem. Additionally, this helps us avoid problems with hair or headwear that would interfere with the "vertical position" method.  
 For example, the following images represent different stride cycles from the same subject:  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/0.png" width="20%">
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/1.png" width="20%">
