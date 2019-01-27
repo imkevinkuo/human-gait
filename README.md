@@ -7,7 +7,7 @@ A research project on extracting features of human gait from side-view treadmill
 ## Pixel counting
 We can determine stride cycles by simply counting the number of pixels in each frame.  
 In this graph, local minima represent the frames where legs cross over each other. The frames between any 3 consecutive minima represent a complete stride cycle (two steps).  
-<img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/pixelsum.png" width="80%">  
+<img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/pixelsum.png" width="60%">  
 
 ## Vertical position and velocity
 To determine vertical position of the subject, we calculate the geometric center of the head.  
@@ -34,5 +34,5 @@ If the "correct guess" range is extended to the 5 most likely subjects, our accu
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/z_nn_classification.png" width="40%">  
 
 ## Average silhouette
-To avoid classifying time series data, we can split each subject's data into stride cycles (given by any of the previous methods), then average all of the frames in a cycle to create an image classification problem.  
+To avoid classifying time series data, we can split each subject's data into stride cycles (given by any of the previous methods), then average all of the frames in a cycle to create an image classification problem.    
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/avgsilhouette.png" width="20%">  
