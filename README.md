@@ -2,8 +2,6 @@
   
 A research project on extracting features of human gait from side-view treadmill videos.  
 
-# Feature extraction
-
 ## Pixel counting
 We can determine stride cycles by simply counting the number of pixels in each frame.  
 In this graph, local minima represent the frames where legs cross over each other. The frames between any 3 consecutive minima represent a complete stride cycle (two steps).  
@@ -27,10 +25,13 @@ If we plot the angle of inclination (obtained by using an ellipse to approximate
 However, the plot of the ellipse center's height is not visually friendly - this is because in a side treadmill video, the arms and legs cross over the body and each other frequently, skewing the average of all the pixels in the image. Other factors such as clothing and hair also create artifacts in the data.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/ellipseheight.png" width="50%">  
 
-## Fitting Data
+## Fitting time series
 Using the "vertical position and velocity" technique, position-time series are extracted from 28 subjects. Each subject has a "gallery" and a "probe" series (both consisting of 300 data points). To classify each "probe" series, we directly use the "gallery" videos as a model. We then use nearest-neighbor classifcation, measuring euclidian distance with discrete time warping with hyperparameter w=10.  
-Out of the 28 subjects, 15 are correctly classified as the "most likely match".  
-If the "correct guess" range is extended to the 5 most likely subjects, our accuracy increases to 93% (26/28).  
+Out of the 28 "probe" videos:  
+- 15 are matched correctly to their "gallery" video.  
+- 5 have the correct answer as the 2nd most likely match.  
+- 3 are 3rd and 5th most likely.  
+Overall, 26/28 of the subjects have both their videos classified somewhat near each other.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/z_nn_classification.png" width="40%">  
 
 ## Average silhouette
