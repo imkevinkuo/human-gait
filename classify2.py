@@ -5,7 +5,8 @@ import cv2
 import sys
 import math
 import os.path
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score
+
 from sklearn.model_selection import cross_val_predict
 from sklearn.metrics import precision_score, recall_score, precision_recall_curve, confusion_matrix
 
@@ -69,7 +70,8 @@ def sgd_single(X_train,y_train,X_test,y_test): # binary SGD
     y_train_x = (y_train == tc)
     sgd_clf = SGDClassifier(max_iter=5, tol=-np.infty, random_state=42)
     sgd_clf.fit(X_train, y_train_x)
-    cvs = cross_val_score(sgd_clf, X_train, y_train_x, cv=4, scoring="accuracy")
+    cvs = cross_val_score(sgd_clf, X_train, y_train_x, cv=4, scoring="accuracy")
+
     print(cvs)
     y_train_pred = cross_val_predict(sgd_clf, X_train, y_train_x, cv=4)
     cm = confusion_matrix(y_train_x, y_train_pred)
@@ -79,7 +81,8 @@ def sgd_classify(X_train,y_train,X_test,y_test,i): # multiclass SGD, OnevAll
     from sklearn.linear_model import SGDClassifier
     sgd_clf = SGDClassifier(max_iter=i, tol=-np.infty, random_state=42)
     sgd_clf.fit(X_train, y_train)
-    cvs = cross_val_score(sgd_clf, X_train, y_train, cv=4, scoring="accuracy")
+    cvs = cross_val_score(sgd_clf, X_train, y_train, cv=4, scoring="accuracy")
+
     print(cvs)
     y_train_pred = cross_val_predict(sgd_clf, X_train, y_train, cv=4)
 ##    cm = confusion_matrix(y_train, y_train_pred)
@@ -90,9 +93,11 @@ def sgd_classify(X_train,y_train,X_test,y_test,i): # multiclass SGD, OnevAll
 def sgd_classify_ovo(X_train,y_train,X_test,y_test,i): # multiclass SGD, OnevOne
     from sklearn.linear_model import SGDClassifier
     from sklearn.multiclass import OneVsOneClassifier
-    sgd_clf = OneVsOneClassifier(SGDClassifier(max_iter=i, tol=-np.infty, random_state=42))
+    sgd_clf = OneVsOneClassifier(SGDClassifier(max_iter=i, tol=-np.infty, random_state=42))
+
     sgd_clf.fit(X_train, y_train)
-    cvs = cross_val_score(sgd_clf, X_train, y_train, cv=4, scoring="accuracy")
+    cvs = cross_val_score(sgd_clf, X_train, y_train, cv=4, scoring="accuracy")
+
     print(cvs)
     y_train_pred = cross_val_predict(sgd_clf, X_train, y_train, cv=4)
 ##    cm = confusion_matrix(y_train, y_train_pred)
@@ -108,7 +113,8 @@ def rf_classify(X_train,y_train,X_test,y_test, n): # random forest
     from sklearn.ensemble import RandomForestClassifier
     rf_clf = RandomForestClassifier(n_estimators=n, random_state=42)
     rf_clf.fit(X_train, y_train)
-    cvs = cross_val_score(rf_clf, X_train, y_train, cv=4, scoring="accuracy")
+    cvs = cross_val_score(rf_clf, X_train, y_train, cv=4, scoring="accuracy")
+
     print(cvs)
     y_train_pred = cross_val_predict(rf_clf, X_train, y_train, cv=4)
 ##    cm = confusion_matrix(y_train, y_train_pred)
@@ -126,11 +132,11 @@ np.random.seed(0)
 shuffle = np.random.permutation(716)
 X,y = X[shuffle], y[shuffle]
 
-acc = []
-for i in range(1,15):
+##acc = []
+##for i in range(1,21):
 ##    a = sgd_classify(*even_sets(X,y), i)
 ##    a = sgd_classify_ovo(*even_sets(X,y),i)
 ##    a = sgd_single(*even_sets(X,y))
-    a = rf_classify(*even_sets(X,y), i)
-    acc.append(a)
-plot([i for i in range(1,len(acc)+1)], acc)
+##    a = rf_classify(*even_sets(X,y), i)
+##    acc.append(a)
+##plot([i for i in range(1,len(acc)+1)], acc)

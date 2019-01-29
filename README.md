@@ -43,7 +43,7 @@ For example, the following images represent different stride cycles from the sam
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/3.png" width="20%">  
 
 ## SVM Classifier
-sklearn's SGDClassifier uses several binary classifiers (linear SVMs) to create a multiclass classifier. The following plot shows the accuracy of a OvA (one versus all) classifier as the hyperparameter i (iterations of descent) is increased.  
+sklearn's SGDClassifier uses a binary classifier (linear SVM) for each class to create a multiclass classifier. The following plot shows the accuracy of a OvA (one versus all) classifier as the hyperparameter i (iterations of descent) is increased.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/sgdclassifierova.png" width="40%">  
 The following plot is for a OvO (one-vs-one, each class is trained against every other class) classifier.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/sgdclassifierovo.png" width="40%">  
