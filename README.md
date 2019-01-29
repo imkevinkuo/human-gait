@@ -41,3 +41,14 @@ For example, the following images represent different stride cycles from the sam
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/1.png" width="20%">
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/2.png" width="20%">
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/3.png" width="20%">  
+
+## SVM Classifier
+sklearn's SGDClassifier uses several binary classifiers (linear SVMs) to create a multiclass classifier. The following plot shows the accuracy of a OvA (one versus all) classifier as the hyperparameter i (iterations of descent) is increased.  
+<img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/sgdclassifierova.png" width="40%">  
+The following plot is for a OvO (one-vs-one, each class is trained against every other class) classifier.  
+<img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/sgdclassifierovo.png" width="40%">  
+Large amounts of the error in the OvA SGD classifier come from particular classes having low accuracy. This can potentially be solved by removing the problematic classes from the OvA training and using a separate classifier to classify them.  TODO
+
+
+This final plot is for a random forest classifier, showing accuracy as hyperparameter N (# of estimators) is increased.  
+<img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/rfclassifier.png" width="40%">  

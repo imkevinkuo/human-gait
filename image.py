@@ -152,11 +152,14 @@ def processSubject(path, t): # t is type of feature extraction
     print(path + " loaded." + " "*20)
     return files, data
 def avg_shad(files, data):
+    for f in files:
+        f[f < 10] = 0
+        f[f > 245] = 255
     avg_imgs = []
     m = split_cyc(data)
-    for i in range(0,len(m)-2,2):
+    for i in range(0,len(m)-2):
         N = m[i+2]-m[i]
-        avg_imgs.append(np.uint8(sum([(a/N).astype(int) for a in files[m[i]:m[i+2]]])))
+        avg_imgs.append(np.uint8(sum([(a/N) for a in files[m[i]:m[i+2]]])))
     return avg_imgs
 def split_cyc(s):
     cutoff = min(s) + (max(s)-min(s))/2
@@ -175,14 +178,14 @@ if len(sys.argv) == 2:
     T = sys.argv[1]
     cwd = os.getcwd()
     datadir = "TreadmillDatasetA"
-    folder = "gallery_10km"
+    folder = "probe_10km"
     accepted = ["0", "1", "2"]
     if T in accepted:
         exclude = []
         if T == "0":
             exclude = ["00116", "00117", "00124", "00128", "00134", "00140"]
-        if T == "2":
-            os.mkdir(datadir+"_avg")
+##        if T == "2":
+##            os.mkdir(datadir+"_avg")
         all_data = []
         subjects = os.listdir(os.path.join(cwd,datadir))
         for subject in subjects:
@@ -191,9 +194,10 @@ if len(sys.argv) == 2:
                 files, data = processSubject(path, T)
                 all_data.append(data)
                 if T == "2":
-                    os.mkdir(os.path.join(datadir+"_avg", subject))
+##                    os.mkdir(os.path.join(datadir+"_avg", subject))
+                    os.mkdir(os.path.join(datadir+"_avg", subject, folder))
                     av_f = avg_shad(files,data)
-                    av_p = os.path.join(cwd, datadir+"_avg", subject)
+                    av_p = os.path.join(cwd, datadir+"_avg", subject, folder)
                     for i in range(len(av_f)):
                         filepath = os.path.join(av_p, str(i) + ".png")
                         cv2.imwrite(filepath, av_f[i])
