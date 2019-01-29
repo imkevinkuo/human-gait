@@ -11,10 +11,10 @@ In this graph, local minima represent the frames where legs cross over each othe
 To determine vertical position of the subject, we calculate the geometric center of the head. Neck cutoff is determined by the pair of opposing black pixels with shortest distance, and the row values of all white pixels above the cutoff are averaged.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/00094.png" width="20%">
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/00001red.png" width="20%">  
-Vertical position vs. time:  
+Sample vertical position vs. time:  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/10kmposition.png" width="60%">  
 Once we have a graph of vertical position, we can take the 1st derivative to measure the subject's vertical velocity. The minimums in the velocity graph signify the frames where the subject's foot strikes the ground. Foot strike can also be used to determine stride cycles.  
-Vertical velocity vs. time:  
+Sample vertical velocity vs. time:  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/10kmvelocity.png" width="60%">  
 
 ## Ellipse of Approximation
