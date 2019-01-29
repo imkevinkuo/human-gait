@@ -19,6 +19,7 @@ Sample vertical velocity vs. time:
 
 ## Ellipse of Approximation
 Method documented in <a href="https://dl.acm.org/citation.cfm?id=2676612">Extracting silhouette-based characteristics for human gait analysis using one camera</a>.  
+The method calculates the eigenvectors and eigenvalues of the image's covariance matrix, which model a bounding ellipse around the subject.  
 If we plot the angle of inclination (obtained by using an ellipse to approximate the shape of the silhouette), we can clearly see the frames of left/right foot strike, given by the (respectively) higher/lower local minima of the graph.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/ellipseangles.png" width="50%">  
 
@@ -26,12 +27,11 @@ However, the plot of the ellipse center's height is not visually friendly - this
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/ellipseheight.png" width="50%">  
 
 ## Fitting time series
-Using the "vertical position and velocity" technique, position-time series are extracted from 28 subjects. Each subject has a "gallery" and a "probe" series (both consisting of 300 data points). To classify each "probe" series, we directly use the "gallery" videos as a model. We then use nearest-neighbor classifcation, measuring euclidian distance with discrete time warping with hyperparameter w=10.  
-Out of the 28 "probe" videos:  
-- 15 are matched correctly to their "gallery" video.  		
+Using the "vertical position and velocity" technique, position-time series are extracted from 28 subjects. Each subject has two videos of data, each consisting of 300 frames. Since we are trying to fit time series, one video will be used for training and the other will be used for validation. The testing videos are classified using nearest-neighbor distance with discrete time warping (hyperparameter w=10).  
+Out of the 28 validation videos:  
+- 15 are matched correctly to their testing video.  		
 - 5 have the correct answer as the 2nd most likely match.  
-- 3 are 3rd and 5th most likely.  
-Overall, 26/28 of the subjects have both their videos classified somewhat near each other.  
+- 3 are 3rd and 5th most likely.   
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/z_nn_classification.png" width="40%">  
 
 ## Average silhouette
