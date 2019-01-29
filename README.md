@@ -8,7 +8,7 @@ In this graph, local minima represent the frames where legs cross over each othe
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/pixelsum.png" width="60%">  
 
 ## Vertical position and velocity
-To determine vertical position of the subject, we calculate the geometric center of the head.  
+To determine vertical position of the subject, we calculate the geometric center of the head. Neck cutoff is determined by the pair of opposing black pixels with shortest distance, and the row values of all white pixels above the cutoff are averaged.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/00094.png" width="20%">
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/00001red.png" width="20%">  
 Vertical position vs. time:  
@@ -42,7 +42,7 @@ For example, the following images represent different stride cycles from the sam
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/2.png" width="20%">
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/3.png" width="20%">  
 
-## SVM Classifier
+## Classifiers
 sklearn's SGDClassifier uses a binary classifier (linear SVM) for each class to create a multiclass classifier. The following plot shows the accuracy of a OvA (one versus all) classifier as the hyperparameter i (iterations of descent) is increased.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/sgdclassifierova.png" width="40%">  
 The following plot is for a OvO (one-vs-one, each class is trained against every other class) classifier.  
@@ -50,5 +50,5 @@ The following plot is for a OvO (one-vs-one, each class is trained against every
 Large amounts of the error in the OvA SGD classifier come from particular classes having low accuracy. This can potentially be solved by removing the problematic classes from the OvA training and using a separate classifier to classify them.  TODO
 
 
-This final plot is for a random forest classifier, showing accuracy as hyperparameter N (# of estimators) is increased.  
+sklearn also has a random forest classifier. This final plot shows accuracy as hyperparameter N (# of estimators) is increased.  
 <img src="https://raw.githubusercontent.com/imkevinkuo/human-gait/master/imgs/rfclassifier.png" width="40%">  
