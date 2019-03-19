@@ -5,8 +5,8 @@ import cv2
 import sys
 import math
 import os.path
-from sklearn.model_selection import cross_val_score
 
+from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import cross_val_predict
 from sklearn.metrics import precision_score, recall_score, precision_recall_curve, confusion_matrix
 
@@ -76,6 +76,7 @@ def sgd_single(X_train,y_train,X_test,y_test): # binary SGD
     y_train_pred = cross_val_predict(sgd_clf, X_train, y_train_x, cv=4)
     cm = confusion_matrix(y_train_x, y_train_pred)
     print(cm)
+    return val_test(sgd_clf, X_test, Y_test)
         
 def sgd_classify(X_train,y_train,X_test,y_test,i): # multiclass SGD, OnevAll
     from sklearn.linear_model import SGDClassifier
